@@ -75,7 +75,7 @@ class Kyokumen
   end
 end
 
-FONT = StarRuby::Font.new("mplus-1c-regular.ttf", 50)
+FONT = StarRuby::Font.new("migmix-1p-regular.ttf", 50)
 
 def text_wide(str, x=0, y=0, c=Color(0, 0, 0), s=StarRuby::Game.current.screen)
   s.render_text(str.toutf8, x, y, FONT, c, true)
