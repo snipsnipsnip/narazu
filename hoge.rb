@@ -47,7 +47,7 @@ module KomaInfo
     if sengo
       self?(k)
     else
-      k & ENEMY != 0
+      (k & ENEMY) != 0
     end
   end
 
@@ -71,6 +71,7 @@ class Kyokumen
   def draw
     (FU..HI).each_with_index do |koma, i|
       text_wide info_to_s(koma), i * 60
+      text_wide info_to_s(koma + ENEMY), i * 60
     end
   end
 end

@@ -1,9 +1,15 @@
 module Koma where
 
+import System.Random
+
 data Koma
 	= Fu | Kyo | Kei | Gin | Kin | Kaku | Hi | Ou 
 	| To | NariKyo | NariKei | NariGin | Ma | Ryu
-	deriving (Eq, Ord)
+	deriving (Eq, Ord, Enum, Bounded, Read)
+
+instance Random Koma where
+	randomR (a, b) g = let (n, gg) = randomR (fromEnum a, fromEnum b) g in (toEnum n, gg)
+	random = randomR (minBound, maxBound)
 
 instance Show Koma where
 	show x = case x of
