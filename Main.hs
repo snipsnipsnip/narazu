@@ -18,6 +18,7 @@ import Data.Maybe
 import Data.List
 import Control.Monad
 import System.Random
+import Control.Monad.Writer
 
 -- $(makeLenses [''Kyokumen])
 
@@ -36,6 +37,8 @@ listKikiKoma banmen pos = filter kiki (listKoma banmen)
 	where
 	kiki (komapos, koma) = pos `elem` reachablePosFrom (Just koma) komapos banmen
 
+-- posにコマがあったらどこまで動けるかを調べる。
+-- コマにNothingを渡すと現に盤面にあるコマを使う。
 reachablePosFrom :: Maybe (Bool, Koma) -> Pos -> Banmen -> [Pos]
 reachablePosFrom mkoma from Banmen{..} = maybe [] filterReachableCells $ mkoma `mplus` (_banmen ! from)
 	where
@@ -97,18 +100,42 @@ choosePromote koma from to b
     promoteArea = if _isSente b then [7..9] else [1..3]
     needPromote = willStuck koma to b
 
-main = loop 1 initialBanmen
+isOute :: Banmen -> Bool
+isOute (b@Banmen{..}) = not $ null $ listKikiKoma b ouPos
 	where
-	loop n banmen = do
-		--print banmen
-		print n
-		print $ PB banmen
-		let tes = listTe banmen
-		putStrLn $ "hands: " ++ show (length tes)
-		te <- fmap (tes !!) $ randomRIO (0, length tes - 1)
-		print te
-		if inBoard $ _from te
-			then print $ _banmen banmen ! _from te
-			else print $ (if _isSente banmen then _senteMochigoma banmen else _kouteMochigoma banmen) !! suji (_from te)
-		unless (Ou `elem` _senteMochigoma banmen || Ou `elem` _kouteMochigoma banmen) $ do
-			loop (n + 1) $ applyTe te banmen
+	Just (ouPos, _) = find (((_isSente, Ou) ==) . snd) $ listKoma b
+
+main = tekitouLoop 1 initialBanmen
+
+tekitouLoop n banmen = do
+	--print banmen
+	print n
+	print $ PB banmen
+	let tes = listTe banmen
+	putStrLn $ "hands: " ++ show (length tes)
+	te <- fmap (tes !!) $ randomRIO (0, length tes - 1)
+	print te
+	if inBoard $ _from te
+		then print $ _banmen banmen ! _from te
+		else print $ (if _isSente banmen then _senteMochigoma banmen else _kouteMochigoma banmen) !! suji (_from te)
+	unless (Ou `elem` _senteMochigoma banmen || Ou `elem` _kouteMochigoma banmen) $ do
+		tekitouLoop (n + 1) $ applyTe te banmen
+
+tume = Banmen
+    { _banmen = listArray (Pos (1, 1), Pos (9, 9)) (repeat Nothing) // ban
+    , _senteMochigoma = [Kin]
+    , _kouteMochigoma = [minBound..maxBound]
+    , _isSente = True
+    }
+    where
+    ban = execWriter $ do
+    	k 1 1 True Kyo
+    	k 2 1 True Kei
+    	k 1 2 True Fu
+    	k 2 2 True Ou
+    	k 3 4 True Ma
+    	k 4 1 False Ma
+    	k 4 2 False Ma
+    	where
+    	k x y color koma = tell [(Pos (x, y), Just (color, koma))]
+
