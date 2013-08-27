@@ -60,8 +60,3 @@ applyTe Te{..} Banmen{..} = Banmen
     
     applyIf False _ x = x
     applyIf True f x = f x
-
-doesPromote :: Te -> Banmen -> Bool
-doesPromote Te{..} Banmen{..} = any (`elem` promoteArea) [dan _from, dan _to]
-    where
-    promoteArea = if _isSente then [7..9] else [1..3]

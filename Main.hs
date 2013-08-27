@@ -68,7 +68,7 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 		let Just (side, koma) = mkoma
 		guard $ side == _isSente
 		to <- reachablePosFrom mkoma pos b
-		nari <- if canPromote koma && doesPromote (Te pos to undefined) b then [True, False] else [False]
+		nari <- choosePromote koma pos to b
 		return $ Te pos to nari
 	
 	listHariTe = do
@@ -77,10 +77,23 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 		let sujikoma = [(pos, _banmen ! pos) | dan <- [1..9], let pos = Pos (suji, dan)]
 		guard $ checkNifu koma sujikoma
 		(to, Nothing) <- sujikoma
-		guard $ not $ null $ reachablePosFrom (Just (_isSente, koma)) to b
+		guard $ not $ willStuck koma to b
 		return $ Te (Pos (i, 0)) to False
 
 	checkNifu koma sujikoma = (koma == Fu &&) $ isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
+
+willStuck :: Koma -> Pos -> Banmen -> Bool
+willStuck koma to b = null $ reachablePosFrom (Just (_isSente b, koma)) to b
+
+choosePromote :: Koma -> Pos -> Pos -> Banmen -> [Bool]
+choosePromote koma from to b
+	| not (canPromote koma && promoteable) = [False]
+	| needPromote = [True]
+	| otherwise = [True, False]
+    where
+    promoteable = any (`elem` promoteArea) [dan from, dan to]
+    promoteArea = if _isSente b then [7..9] else [1..3]
+    needPromote = willStuck koma to b
 
 main = loop 1 initialBanmen
 	where
@@ -89,6 +102,7 @@ main = loop 1 initialBanmen
 		print n
 		print $ PB banmen
 		let tes = listTe banmen
+		putStrLn $ "hands: " ++ show (length tes)
 		te <- fmap (tes !!) $ randomRIO (0, length tes - 1)
 		print te
 		if inBoard $ _from te
