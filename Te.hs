@@ -16,7 +16,7 @@ data Te = Te
 
 applyTe :: Te -> Banmen -> Banmen
 applyTe Te{..} Banmen{..} = Banmen
-    { _banmen = _banmen // [(_from, Nothing), (_to, Just $ applyIf _nari (second promote) moving)]
+    { _banmen = _banmen // [(_from, Nothing), (_to, Just $ tryPromote moving)]
     , _senteMochigoma = applyIf _isSente adjustMochigoma _senteMochigoma
     , _kouteMochigoma = applyIf (not _isSente) adjustMochigoma _kouteMochigoma
     , _isSente = not _isSente
@@ -28,6 +28,11 @@ applyTe Te{..} Banmen{..} = Banmen
         | otherwise = let Just k = _banmen ! _from in k
     
     captured = _banmen ! _to
+
+    tryPromote = applyIf (_nari && canPromote) (second promote)
+        where
+        canPromote = dan _to `elem` promoteArea
+        promoteArea = if _isSente then [1..3] else [7..9]
     
     adjustMochigoma = removeMochigoma . mayAddCaptured
         where
