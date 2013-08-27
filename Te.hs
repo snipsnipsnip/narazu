@@ -32,7 +32,7 @@ applyTe Te{..} Banmen{..} = Banmen
     tryPromote = applyIf (_nari && canPromote) (second promote)
         where
         canPromote = dan _to `elem` promoteArea
-        promoteArea = if _isSente then [1..3] else [7..9]
+        promoteArea = if _isSente then [7..9] else [1..3]
     
     adjustMochigoma = removeMochigoma . mayAddCaptured
         where

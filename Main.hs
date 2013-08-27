@@ -50,3 +50,4 @@ reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! fro
 					return (p, [])
 				_ -> return (p, rest)
 
+t a b c d = applyTe (Te (Pos (a,b)) (Pos (c,d)) True)
