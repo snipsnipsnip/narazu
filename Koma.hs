@@ -50,6 +50,10 @@ isPromoted Ma = True
 isPromoted Ryu = True
 isPromoted _ = False
 
+canJump :: Koma -> Bool
+canJump Kei = True
+canJump _ = False
+
 nirami :: Koma -> [Pos]
 nirami Fu = map Pos [(0, 1)]
 nirami Kyo = map Pos [(0, n) | n <- [1..8]]
