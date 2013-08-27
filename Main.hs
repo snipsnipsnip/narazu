@@ -15,6 +15,7 @@ import Te
 import Data.Array
 --import Data.Array.ST
 import Data.Maybe
+import Debug.Trace
 
 -- $(makeLenses [''Kyokumen])
 
@@ -32,10 +33,12 @@ kikiMap Banmen{..} pos = do
 reachablePosFrom :: Pos -> Banmen -> [Pos]
 reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! from
 	where
-	filterReachableCells (side, koma) = takeWhile notBlocked . map ((<> from) . flipDir) =<< nirami koma
+	filterReachableCells (side, koma) = do
+		path <- nirami koma
+		takeWhile notBlocked $ map ((<> from) . flipDir) path
 		where
 		flipDir = if side then id else negatePos
-		notBlocked p = case _banmen ! p of
+		notBlocked p = trace (show p) $ inBoard p && case _banmen ! p of
 			Just (pside, _) -> pside /= side
 			_ -> True
 

@@ -20,10 +20,10 @@ instance Monoid Pos where
 instance Show Pos where
 	show = show . unPos
 
-dan = fst . unPos
-suji = snd . unPos
+dan = snd . unPos
+suji = fst . unPos
 negatePos (Pos (a,b)) =  (Pos (-a, -b))
 
-inBoard (Pos p) = (1, 1) <= p && p <= (9, 9)
+inBoard (Pos (a, b)) = 1 <= a && a <= 9 && 1 <= b && b <= 9
 
 

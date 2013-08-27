@@ -36,7 +36,7 @@ initialBanmen = Banmen
     where
     list = map (color True) [dan1, dan2, dan3] ++ empty ++ map (color False) [dan3, reverse dan2, dan1]
     dan1 = map Just [Kyo, Kei, Gin, Kin, Ou, Kin, Gin, Kei, Kyo]
-    dan2 = Nothing : Just Hi : replicate 5 Nothing ++ [Just Kaku, Nothing]
+    dan2 = Nothing : Just Kaku : replicate 5 Nothing ++ [Just Hi, Nothing]
     dan3 = replicate 9 (Just Fu)
     empty = replicate 3 $ replicate 9 Nothing
     color isSente komas = map (fmap ((,) isSente)) komas

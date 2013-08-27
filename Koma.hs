@@ -55,11 +55,11 @@ canJump Kei = True
 canJump _ = False
 
 nirami :: Koma -> [[Pos]]
-nirami Fu = ways [(1, 0)]
+nirami Fu = ways [(0, 1)]
 nirami Kyo = [[Pos (0, n) | n <- [1..8]]]
 nirami Kei = ways [(1, 2), (-1, 2)]
-nirami Gin = ways [(-1, 1), (0, 1), (1, 1), (-1, -1), (1, -1)]
-nirami Kin = ways [(-1, 1), (0, 1), (1, 1), (-1, 0), (1, 0), (0, -1)]
+nirami Gin = nirami Fu ++ diagonalNirami [1]
+nirami Kin = straightNirami [1] ++ ways [(1, 1), (-1, 1)]
 nirami Kaku = diagonalNirami [1..8]
 nirami Hi = straightNirami [1..8]
 nirami Ou = straightNirami [1] ++ diagonalNirami [1]
