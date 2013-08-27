@@ -118,6 +118,7 @@ tekitouLoop n banmen = do
 	if inBoard $ _from te
 		then print $ _banmen banmen ! _from te
 		else print $ (if _isSente banmen then _senteMochigoma banmen else _kouteMochigoma banmen) !! suji (_from te)
+	guard $ not (_isSente banmen) || isOute banmen
 	unless (Ou `elem` _senteMochigoma banmen || Ou `elem` _kouteMochigoma banmen) $ do
 		tekitouLoop (n + 1) $ applyTe te banmen
 
