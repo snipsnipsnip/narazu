@@ -27,7 +27,7 @@ listKoma :: Banmen -> [(Pos, (Bool, Koma))]
 listKoma Banmen{..} = do
 	dan <- [1..9]
 	suji <- [1..9]
-	let pos = Pos (dan, suji)
+	let pos = Pos (suji, dan)
 	koma <- maybeToList $ _banmen ! pos
 	return (pos, koma)
 
@@ -62,7 +62,7 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 	where
 
 	listMoveTe = do
-		pos <- [Pos (dan, suji) | dan <- [1..9], suji <- [1..9]]
+		pos <- [Pos (suji, dan) | dan <- [1..9], suji <- [1..9]]
 		let mkoma = _banmen ! pos
 		guard $ isJust mkoma
 		let Just (side, koma) = mkoma
@@ -74,7 +74,7 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 	listHariTe = do
 		(i, koma) <- zip [0..] $ if _isSente then _senteMochigoma else _kouteMochigoma
 		suji <- [1..9]
-		let sujikoma = [(pos, _banmen ! pos) | dan <- [1..9], let pos = Pos (dan, suji)]
+		let sujikoma = [(pos, _banmen ! pos) | dan <- [1..9], let pos = Pos (suji, dan)]
 		guard $ checkNifu koma sujikoma
 		(to, Nothing) <- sujikoma
 		return $ Te (Pos (i, 0)) to False
