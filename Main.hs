@@ -83,7 +83,9 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 	checkNifu koma sujikoma = (koma == Fu &&) $ isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
 
 willStuck :: Koma -> Pos -> Banmen -> Bool
-willStuck koma to b = null $ reachablePosFrom (Just (_isSente b, koma)) to b
+willStuck koma to b = suji to == cliff && koma `elem` [Fu, Kei, Kyo]
+	where
+	cliff = if _isSente b then 9 else 1
 
 choosePromote :: Koma -> Pos -> Pos -> Banmen -> [Bool]
 choosePromote koma from to b
