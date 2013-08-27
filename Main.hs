@@ -82,10 +82,11 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 
 	checkNifu koma sujikoma = (koma == Fu &&) $ isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
 
-main = loop initialBanmen
+main = loop 1 initialBanmen
 	where
-	loop banmen = do
+	loop n banmen = do
 		--print banmen
+		print n
 		print $ PB banmen
 		let tes = listTe banmen
 		te <- fmap (tes !!) $ randomRIO (0, length tes - 1)
@@ -94,4 +95,4 @@ main = loop initialBanmen
 			then print $ _banmen banmen ! _from te
 			else print $ (if _isSente banmen then _senteMochigoma banmen else _kouteMochigoma banmen) !! suji (_from te)
 		unless (Ou `elem` _senteMochigoma banmen || Ou `elem` _kouteMochigoma banmen) $ do
-			loop $ applyTe te banmen
+			loop (n + 1) $ applyTe te banmen
