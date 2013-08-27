@@ -30,9 +30,12 @@ kikiMap Banmen{..} pos = do
 -}
 
 reachablePosFrom :: Pos -> Banmen -> [Pos]
-reachablePosFrom from Banmen{..} = concatMap (takeWhile notBlocked . map ((<> from) . flipDir)) $ nirami koma
+reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! from
 	where
-	Just (side, koma) = _banmen ! from
-	flipDir = if _isSente then id else negatePos
-	notBlocked p = isNothing (_banmen ! p)
+	filterReachableCells (side, koma) = takeWhile notBlocked . map ((<> from) . flipDir) =<< nirami koma
+		where
+		flipDir = if side then id else negatePos
+		notBlocked p = case _banmen ! p of
+			Just (pside, _) -> pside /= side
+			_ -> True
 
