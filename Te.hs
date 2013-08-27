@@ -14,6 +14,14 @@ data Te = Te
     , _nari :: Bool
     } deriving (Show, Eq)
 
+{-
+チェックしてないもの：
+    コマの移動範囲
+    二歩
+    打ち歩詰め
+    持ち駒の添字
+    成りエリア
+-}
 applyTe :: Te -> Banmen -> Banmen
 applyTe Te{..} Banmen{..} = Banmen
     { _banmen = _banmen // removeOldKoma [(_to, Just $ tryPromote moving)]
@@ -31,11 +39,8 @@ applyTe Te{..} Banmen{..} = Banmen
 
     captured = _banmen ! _to
 
-    tryPromote = applyIf (_nari && canPromote) (second promote)
-        where
-        canPromote = not isUsingMochigoma && any (`elem` promoteArea) [dan _from, dan _to]
-        promoteArea = if _isSente then [7..9] else [1..3]
-    
+    tryPromote = applyIf _nari (second promote)
+
     adjustMochigoma = mayAddCaptured . removeMochigoma
         where
         removeMochigoma = applyIf isUsingMochigoma $ const $ mochigomaBefore ++ mochigomaAfter
@@ -55,4 +60,7 @@ applyTe Te{..} Banmen{..} = Banmen
     applyIf False _ x = x
     applyIf True f x = f x
 
-
+doesPromote :: Te -> Banmen -> Bool
+doesPromote Te{..} Banmen{..} = any (`elem` promoteArea) [dan _from, dan _to]
+    where
+    promoteArea = if _isSente then [7..9] else [1..3]

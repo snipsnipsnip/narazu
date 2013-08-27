@@ -48,6 +48,15 @@ instance Show Koma where
 		Ryu -> "竜"
 -}
 
+canPromote :: Koma -> Bool
+canPromote Fu = True
+canPromote Kyo = True
+canPromote Kei = True
+canPromote Gin = True
+canPromote Kaku = True
+canPromote Hi = True
+canPromote _ = False
+
 promote :: Koma -> Koma
 promote Fu = To
 promote Kyo = NariKyo

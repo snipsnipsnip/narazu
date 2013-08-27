@@ -56,3 +56,26 @@ reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! fro
 
 t a b c d = applyTe (Te (Pos (a,b)) (Pos (c,d)) True)
 
+listTe :: Banmen -> [Te]
+listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
+	where
+
+	listMoveTe = do
+		pos <- [Pos (dan, suji) | dan <- [1..9], suji <- [1..9]]
+		let mkoma = _banmen ! pos
+		guard $ isJust mkoma
+		let Just (side, koma) = mkoma
+		guard $ side == _isSente
+		to <- reachablePosFrom pos b
+		nari <- if canPromote koma && doesPromote (Te pos to undefined) b then [True, False] else [False]
+		return $ Te pos to nari
+	
+	listHariTe = do
+		(i, koma) <- zip [0..] $ if _isSente then _senteMochigoma else _kouteMochigoma
+		suji <- [1..9]
+		let sujikoma = [(pos, _banmen ! pos) | dan <- [1..9], let pos = Pos (dan, suji)]
+		guard $ checkNifu koma sujikoma
+		(to, Nothing) <- sujikoma
+		return $ Te (Pos (i, 0)) to False
+
+	checkNifu koma sujikoma = (koma == Fu &&) $ isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
