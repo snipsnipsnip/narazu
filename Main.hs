@@ -15,6 +15,8 @@ import Te
 import Data.Array
 --import Data.Array.ST
 import Data.Maybe
+import Data.List
+import Control.Monad
 
 -- $(makeLenses [''Kyokumen])
 
@@ -34,10 +36,17 @@ reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! fro
 	where
 	filterReachableCells (side, koma) = do
 		path <- nirami koma
-		takeWhile notBlocked $ map ((<> from) . flipDir) path
+		unfoldr scanEnemyOrBlock $ map offset path
 		where
+		offset dir = flipDir dir <> from
 		flipDir = if side then id else negatePos
-		notBlocked p = inBoard p && case _banmen ! p of
-			Just (pside, _) -> pside /= side
-			_ -> True
+
+		scanEnemyOrBlock [] = Nothing
+		scanEnemyOrBlock (p:rest) = do
+			guard $ inBoard p
+			case _banmen ! p of
+				Just (pside, _) -> do
+					guard $ pside /= side
+					return (p, [])
+				_ -> return (p, rest)
 
