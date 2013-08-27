@@ -34,7 +34,7 @@ applyTe Te{..} Banmen{..} = Banmen
         canPromote = dan _to `elem` promoteArea
         promoteArea = if _isSente then [7..9] else [1..3]
     
-    adjustMochigoma = removeMochigoma . mayAddCaptured
+    adjustMochigoma = mayAddCaptured . removeMochigoma
         where
         removeMochigoma = applyIf isUsingMochigoma $ const $ mochigomaBefore ++ mochigomaAfter
         
