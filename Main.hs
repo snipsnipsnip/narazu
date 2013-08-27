@@ -11,17 +11,7 @@ import Test.QuickCheck
 import Banmen
 import Koma
 import Pos
+import Te
 
 -- $(makeLenses [''Kyokumen])
 
-data Te = Te
-	{ _from, _to :: Pos
-	, _nari :: Bool
-	, _koma :: Koma
-	}
-
-isHari :: Te -> Bool
-isHari Te {..} = dan _from == -1
-
-applyTe :: Te -> Banmen -> Banmen
-applyTe Te {..} Banmen {..} = Banmen {..}

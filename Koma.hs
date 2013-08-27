@@ -6,12 +6,13 @@ import Pos
 data Koma
 	= Fu | Kyo | Kei | Gin | Kin | Kaku | Hi | Ou 
 	| To | NariKyo | NariKei | NariGin | Ma | Ryu
-	deriving (Eq, Ord, Enum, Bounded, Read)
+	deriving (Eq, Ord, Enum, Bounded, Read, Show)
 
 instance Random Koma where
 	randomR (a, b) g = let (n, gg) = randomR (fromEnum a, fromEnum b) g in (toEnum n, gg)
 	random = randomR (minBound, maxBound)
 
+{-
 instance Show Koma where
 	show x = case x of
 		Fu -> "歩"
@@ -28,6 +29,7 @@ instance Show Koma where
 		NariGin -> "全"
 		Ma -> "馬"
 		Ryu -> "竜"
+-}
 
 promote :: Koma -> Koma
 promote Fu = To
