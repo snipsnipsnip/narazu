@@ -46,3 +46,5 @@ applyTe Te{..} Banmen{..} = Banmen
     
     applyIf False _ x = x
     applyIf True f x = f x
+
+
