@@ -15,7 +15,6 @@ import Te
 import Data.Array
 --import Data.Array.ST
 import Data.Maybe
-import Debug.Trace
 
 -- $(makeLenses [''Kyokumen])
 
@@ -38,7 +37,7 @@ reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! fro
 		takeWhile notBlocked $ map ((<> from) . flipDir) path
 		where
 		flipDir = if side then id else negatePos
-		notBlocked p = trace (show p) $ inBoard p && case _banmen ! p of
+		notBlocked p = inBoard p && case _banmen ! p of
 			Just (pside, _) -> pside /= side
 			_ -> True
 
