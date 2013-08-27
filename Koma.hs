@@ -54,25 +54,30 @@ canJump :: Koma -> Bool
 canJump Kei = True
 canJump _ = False
 
-nirami :: Koma -> [Pos]
-nirami Fu = map Pos [(0, 1)]
-nirami Kyo = map Pos [(0, n) | n <- [1..8]]
-nirami Kei = map Pos [(1, 2), (-1, 2)]
-nirami Gin = map Pos [(-1, 1), (0, 1), (1, 1), (-1, -1), (1, -1)]
-nirami Kin = map Pos [(-1, 1), (0, 1), (1, 1), (-1, 0), (1, 0), (0, -1)]
+nirami :: Koma -> [[Pos]]
+nirami Fu = ways [(1, 0)]
+nirami Kyo = [[Pos (0, n) | n <- [1..8]]]
+nirami Kei = ways [(1, 2), (-1, 2)]
+nirami Gin = ways [(-1, 1), (0, 1), (1, 1), (-1, -1), (1, -1)]
+nirami Kin = ways [(-1, 1), (0, 1), (1, 1), (-1, 0), (1, 0), (0, -1)]
 nirami Kaku = diagonalNirami [1..8]
 nirami Hi = straightNirami [1..8]
-nirami Ou = map Pos [(-1, 1), (0, 1), (1, 1), (-1, 0), (1, 0), (-1, -1), (0, -1), (1, -1)]
+nirami Ou = straightNirami [1] ++ diagonalNirami [1]
 nirami To = nirami Kin
 nirami NariKyo = nirami Kin
 nirami NariKei = nirami Kin
 nirami NariGin = nirami Kin
-nirami Ma = nirami Ou ++ diagonalNirami [2..8]
-nirami Ryu = nirami Ou ++ straightNirami [2..8]
+nirami Ma = straightNirami [1] ++ diagonalNirami [1..8]
+nirami Ryu = diagonalNirami [1] ++ straightNirami [1..8]
 
-diagonalNirami range = map Pos $ concat [[(n, n), (-n, n), (n, -n), (-n, -n)] | n <- range]
-straightNirami range = map Pos $ concat [[(n, 0), (-n, 0), (0, n), (0, -n)] | n <- range]
+ways = map ((:[]) . Pos)
 
-niramiFrom :: Pos -> Koma -> [Pos]
-niramiFrom pos koma = map (<> pos) $ nirami koma
+diagonalNirami range = [ [Pos (n, n) | n <- range]
+					   , [Pos (-n, n) | n <- range]
+					   , [Pos (n, -n) | n <- range]
+					   , [Pos (-n, -n) | n <- range]]
+straightNirami range = [ [Pos (n, 0) | n <- range]
+					   , [Pos (-n, 0) | n <- range]
+					   , [Pos (0, n) | n <- range]
+					   , [Pos (0, -n) | n <- range]]
 
