@@ -16,7 +16,7 @@ data Te = Te
 
 applyTe :: Te -> Banmen -> Banmen
 applyTe Te{..} Banmen{..} = Banmen
-    { _banmen = _banmen // [(_from, Nothing), (_to, Just $ tryPromote moving)]
+    { _banmen = _banmen // removeOldKoma [(_to, Just $ tryPromote moving)]
     , _senteMochigoma = applyIf _isSente adjustMochigoma _senteMochigoma
     , _kouteMochigoma = applyIf (not _isSente) adjustMochigoma _kouteMochigoma
     , _isSente = not _isSente
@@ -27,6 +27,8 @@ applyTe Te{..} Banmen{..} = Banmen
         | isUsingMochigoma = (_isSente, movingMochigoma)
         | otherwise = let Just k = _banmen ! _from in k
     
+    removeOldKoma = applyIf (not isUsingMochigoma) ((_from, Nothing) :)
+
     captured = _banmen ! _to
 
     tryPromote = applyIf (_nari && canPromote) (second promote)
@@ -42,6 +44,7 @@ applyTe Te{..} Banmen{..} = Banmen
 
         resetKoma (side, koma)
             | side == _isSente = error "applyTe: you're capturing ally!"
+            | isUsingMochigoma = error "You can't capture with mochigoma!"
             | otherwise = demote koma
 
     isUsingMochigoma = dan _from < 1
