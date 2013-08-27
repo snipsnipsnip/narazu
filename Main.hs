@@ -86,8 +86,10 @@ main = loop initialBanmen
 	where
 	loop banmen = do
 		print banmen
-		getLine
+		print $ PB banmen
 		let tes = listTe banmen
 		te <- fmap (tes !!) $ randomRIO (0, length tes - 1)
 		print te
-		loop $ applyTe te banmen
+		print (_banmen banmen ! _from te)
+		unless (Ou `elem` _senteMochigoma banmen || Ou `elem` _kouteMochigoma banmen) $ do
+			loop $ applyTe te banmen

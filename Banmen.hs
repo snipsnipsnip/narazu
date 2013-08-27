@@ -12,10 +12,12 @@ data Banmen = Banmen
     { _banmen :: Array Pos (Maybe (Bool, Koma))
     , _senteMochigoma, _kouteMochigoma :: [Koma]
     , _isSente :: Bool
-    } deriving (Eq, Read)
+    } deriving (Eq, Read, Show)
 
-instance Show Banmen where
-    showsPrec _ Banmen{..} = foldl1 (\a b -> a . showString "\n" . b) komalines
+newtype PrettyBanmen = PB Banmen
+
+instance Show PrettyBanmen where
+    showsPrec _ (PB Banmen{..}) = foldl1 (\a b -> a . showString "\n" . b) komalines
         where
         komalines = teban : joinKoma "sente" _senteMochigoma : joinKoma "koute" _kouteMochigoma : banmenlines
         teban = showString $ if _isSente then "next: v" else "next: ^"
