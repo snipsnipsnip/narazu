@@ -17,6 +17,7 @@ import Data.Array
 import Data.Maybe
 import Data.List
 import Control.Monad
+import System.Random
 
 -- $(makeLenses [''Kyokumen])
 
@@ -79,3 +80,12 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 		return $ Te (Pos (i, 0)) to False
 
 	checkNifu koma sujikoma = (koma == Fu &&) $ isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
+
+main = loop initialBanmen
+	where
+	loop banmen = do
+		print banmen
+		getLine
+		let te = listTe banmen
+		i <- randomRIO (0, length te - 1)
+		loop $ applyTe (te !! i) banmen
