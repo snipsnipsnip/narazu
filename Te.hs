@@ -33,7 +33,7 @@ applyTe Te{..} Banmen{..} = Banmen
 
     tryPromote = applyIf (_nari && canPromote) (second promote)
         where
-        canPromote = dan _to `elem` promoteArea
+        canPromote = not isUsingMochigoma && any (`elem` promoteArea) [dan _from, dan _to]
         promoteArea = if _isSente then [7..9] else [1..3]
     
     adjustMochigoma = mayAddCaptured . removeMochigoma
