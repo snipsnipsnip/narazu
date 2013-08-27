@@ -10,15 +10,9 @@ import Test.QuickCheck
 
 import Banmen
 import Koma
+import Pos
 
 -- $(makeLenses [''Kyokumen])
-
-newtype Pos = Pos {unPos :: (Int, Int)} deriving (Eq, Ord, Read)
-dan = fst . unPos
-suji = snd . unPos
-
-instance Show Pos where
-	show = show . unPos
 
 data Te = Te
 	{ _from, _to :: Pos
