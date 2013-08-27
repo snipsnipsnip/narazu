@@ -21,15 +21,19 @@ import Control.Monad
 -- $(makeLenses [''Kyokumen])
 
 type KikiMap = Array Pos Int
-{-
-kikiMap :: Banmen -> Pos -> [Pos]
-kikiMap Banmen{..} pos = do
-	Just (side, koma) <- _banmen ! pos
-	guard $ side == _isSente
-	p <- niramiFrom pos koma
 
-	_banmen ! p
--}
+listKoma :: Banmen -> [(Pos, (Bool, Koma))]
+listKoma Banmen{..} = do
+	dan <- [1..9]
+	suji <- [1..9]
+	let pos = Pos (dan, suji)
+	koma <- maybeToList $ _banmen ! pos
+	return (pos, koma)
+
+listKikiKoma :: Banmen -> Pos -> [(Pos, (Bool, Koma))]
+listKikiKoma banmen pos = filter kiki (listKoma banmen)
+	where
+	kiki (komapos, (_, koma)) = pos `elem` reachablePosFrom komapos banmen
 
 reachablePosFrom :: Pos -> Banmen -> [Pos]
 reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! from
@@ -51,3 +55,4 @@ reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! fro
 				_ -> return (p, rest)
 
 t a b c d = applyTe (Te (Pos (a,b)) (Pos (c,d)) True)
+
