@@ -85,11 +85,13 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 main = loop initialBanmen
 	where
 	loop banmen = do
-		print banmen
+		--print banmen
 		print $ PB banmen
 		let tes = listTe banmen
 		te <- fmap (tes !!) $ randomRIO (0, length tes - 1)
 		print te
-		print (_banmen banmen ! _from te)
+		if inBoard $ _from te
+			then print $ _banmen banmen ! _from te
+			else print $ (if _isSente banmen then _senteMochigoma banmen else _kouteMochigoma banmen) !! suji (_from te)
 		unless (Ou `elem` _senteMochigoma banmen || Ou `elem` _kouteMochigoma banmen) $ do
 			loop $ applyTe te banmen

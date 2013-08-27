@@ -12,7 +12,7 @@ import Control.Arrow (second)
 data Te = Te
     { _from, _to :: Pos
     , _nari :: Bool
-    } deriving (Show, Eq)
+    } deriving (Show, Read, Eq)
 
 {-
 チェックしてないもの：
