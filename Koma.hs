@@ -6,11 +6,28 @@ import Pos
 data Koma
 	= Fu | Kyo | Kei | Gin | Kin | Kaku | Hi | Ou 
 	| To | NariKyo | NariKei | NariGin | Ma | Ryu
-	deriving (Eq, Ord, Enum, Bounded, Read, Show)
+	deriving (Eq, Ord, Enum, Bounded, Read)
 
 instance Random Koma where
 	randomR (a, b) g = let (n, gg) = randomR (fromEnum a, fromEnum b) g in (toEnum n, gg)
 	random = randomR (minBound, maxBound)
+
+instance Show Koma where
+	show x = case x of
+		Fu -> "Fu"
+		Kyo -> "Ky"
+		Kei -> "Ke"
+		Gin -> "Gi"
+		Kin -> "Ki"
+		Kaku -> "Ka"
+		Hi -> "Hi"
+		Ou -> "Ou"
+		To -> "To"
+		NariKyo -> "Nk"
+		NariKei -> "NK"
+		NariGin -> "NG"
+		Ma -> "Ma"
+		Ryu -> "Ryu"
 
 {-
 instance Show Koma where

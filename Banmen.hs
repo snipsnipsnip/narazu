@@ -15,15 +15,14 @@ data Banmen = Banmen
     } deriving (Eq, Read)
 
 instance Show Banmen where
-    showsPrec _ Banmen{..} = foldl (\a b -> a . showString "\n" . b) id komalines
+    showsPrec _ Banmen{..} = foldl1 (\a b -> a . showString "\n" . b) komalines
         where
-        komalines = teban : joinKoma _senteMochigoma : joinKoma _kouteMochigoma : banmenlines
-        teban = showString $ if _isSente then "先手" else "後手"
-        joinKoma = foldl (.) id . map shows
-        banmenlines = do
-            dan <- [1..9]
-            suji <- [1..9]
-            return $ maybe (showString "  ") showKoma $ _banmen ! Pos (suji, dan)
+        komalines = teban : joinKoma "sente" _senteMochigoma : joinKoma "koute" _kouteMochigoma : banmenlines
+        teban = showString $ if _isSente then "next: v" else "next: ^"
+        joinKoma msg komas = showString (msg ++ " mochigoma: ") . shows komas
+        joinS = foldl (.) id
+        banmenlines = [joinS [showCell $ _banmen ! Pos (suji, dan) | suji <- [9,8..1]] | dan <- [1..9]]
+        showCell cell = showString "|" . maybe (showString "   ") showKoma cell
         showKoma (True, koma) = showString "v" . shows koma
         showKoma (False, koma) = showString "^" . shows koma
 
