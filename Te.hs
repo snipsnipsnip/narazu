@@ -21,6 +21,7 @@ data Te = Te
     打ち歩詰め
     持ち駒の添字
     成りエリア
+    動けない場所に持ち駒
 -}
 applyTe :: Te -> Banmen -> Banmen
 applyTe Te{..} Banmen{..} = Banmen

@@ -34,10 +34,10 @@ listKoma Banmen{..} = do
 listKikiKoma :: Banmen -> Pos -> [(Pos, (Bool, Koma))]
 listKikiKoma banmen pos = filter kiki (listKoma banmen)
 	where
-	kiki (komapos, (_, koma)) = pos `elem` reachablePosFrom komapos banmen
+	kiki (komapos, koma) = pos `elem` reachablePosFrom (Just koma) komapos banmen
 
-reachablePosFrom :: Pos -> Banmen -> [Pos]
-reachablePosFrom from Banmen{..} = maybe [] filterReachableCells $ _banmen ! from
+reachablePosFrom :: Maybe (Bool, Koma) -> Pos -> Banmen -> [Pos]
+reachablePosFrom mkoma from Banmen{..} = maybe [] filterReachableCells $ mkoma `mplus` (_banmen ! from)
 	where
 	filterReachableCells (side, koma) = do
 		path <- nirami koma
@@ -67,7 +67,7 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 		guard $ isJust mkoma
 		let Just (side, koma) = mkoma
 		guard $ side == _isSente
-		to <- reachablePosFrom pos b
+		to <- reachablePosFrom mkoma pos b
 		nari <- if canPromote koma && doesPromote (Te pos to undefined) b then [True, False] else [False]
 		return $ Te pos to nari
 	
@@ -77,6 +77,7 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 		let sujikoma = [(pos, _banmen ! pos) | dan <- [1..9], let pos = Pos (suji, dan)]
 		guard $ checkNifu koma sujikoma
 		(to, Nothing) <- sujikoma
+		guard $ not $ null $ reachablePosFrom (Just (_isSente, koma)) to b
 		return $ Te (Pos (i, 0)) to False
 
 	checkNifu koma sujikoma = (koma == Fu &&) $ isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
@@ -86,6 +87,7 @@ main = loop initialBanmen
 	loop banmen = do
 		print banmen
 		getLine
-		let te = listTe banmen
-		i <- randomRIO (0, length te - 1)
-		loop $ applyTe (te !! i) banmen
+		let tes = listTe banmen
+		te <- fmap (tes !!) $ randomRIO (0, length tes - 1)
+		print te
+		loop $ applyTe te banmen
