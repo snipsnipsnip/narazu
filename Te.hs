@@ -7,6 +7,7 @@ import Pos
 import Data.List
 import Data.Array
 import Koma
+import Control.Arrow (second)
 
 data Te = Te
     { _from, _to :: Pos
@@ -15,7 +16,7 @@ data Te = Te
 
 applyTe :: Te -> Banmen -> Banmen
 applyTe Te{..} Banmen{..} = Banmen
-    { _banmen = _banmen // [(_from, Nothing), (_to, Just $ applyIf _nari promote moving)]
+    { _banmen = _banmen // [(_from, Nothing), (_to, Just $ applyIf _nari (second promote) moving)]
     , _senteMochigoma = applyIf _isSente adjustMochigoma _senteMochigoma
     , _kouteMochigoma = applyIf (not _isSente) adjustMochigoma _kouteMochigoma
     , _isSente = not _isSente
@@ -23,7 +24,7 @@ applyTe Te{..} Banmen{..} = Banmen
     where
 
     moving
-        | isUsingMochigoma = movingMochigoma
+        | isUsingMochigoma = (_isSente, movingMochigoma)
         | otherwise = let Just k = _banmen ! _from in k
     
     captured = _banmen ! _to
@@ -31,7 +32,12 @@ applyTe Te{..} Banmen{..} = Banmen
     adjustMochigoma = removeMochigoma . mayAddCaptured
         where
         removeMochigoma = applyIf isUsingMochigoma $ const $ mochigomaBefore ++ mochigomaAfter
-        mayAddCaptured = maybe id (:) captured
+        
+        mayAddCaptured = maybe id ((:) . removeSide) captured
+
+        removeSide (side, koma)
+            | side == _isSente = error "applyTe: you're capturing ally!"
+            | otherwise = koma
 
     isUsingMochigoma = dan _from < 1
     (mochigomaBefore, movingMochigoma : mochigomaAfter) = splitAt (suji _from) deck
@@ -40,4 +46,3 @@ applyTe Te{..} Banmen{..} = Banmen
     
     applyIf False _ x = x
     applyIf True f x = f x
-
