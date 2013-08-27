@@ -57,6 +57,15 @@ promote Kaku = Ma
 promote Hi = Ryu
 promote x = x
 
+demote :: Koma -> Koma
+demote To = Fu
+demote NariKyo = Kyo
+demote NariKei = Kei
+demote NariGin = Gin
+demote Ma = Kaku
+demote Ryu = Hi
+demote x = x
+
 isPromoted :: Koma -> Bool
 isPromoted To = True
 isPromoted NariKyo = True

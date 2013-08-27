@@ -38,11 +38,11 @@ applyTe Te{..} Banmen{..} = Banmen
         where
         removeMochigoma = applyIf isUsingMochigoma $ const $ mochigomaBefore ++ mochigomaAfter
         
-        mayAddCaptured = maybe id ((:) . removeSide) captured
+        mayAddCaptured = maybe id ((:) . resetKoma) captured
 
-        removeSide (side, koma)
+        resetKoma (side, koma)
             | side == _isSente = error "applyTe: you're capturing ally!"
-            | otherwise = koma
+            | otherwise = demote koma
 
     isUsingMochigoma = dan _from < 1
     (mochigomaBefore, movingMochigoma : mochigomaAfter) = splitAt (suji _from) deck
