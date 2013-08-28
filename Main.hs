@@ -24,14 +24,6 @@ import Control.Monad.State
 
 type KikiMap = Array Pos Int
 
-listKoma :: Banmen -> [(Pos, (Bool, Koma))]
-listKoma Banmen{..} = do
-	dan <- [1..9]
-	suji <- [1..9]
-	let pos = Pos (suji, dan)
-	koma <- maybeToList $ _banmen ! pos
-	return (pos, koma)
-
 listKikiKoma :: Banmen -> Pos -> [(Pos, (Bool, Koma))]
 listKikiKoma banmen pos = do
 	(komapos, koma@(Just info)) <- assocs $ _banmen banmen
@@ -61,11 +53,12 @@ reachablePosFrom mkoma from Banmen{..} = maybe [] filterReachableCells $ mkoma `
 
 t a b c d = applyTe (Te (Pos (a,b)) (Pos (c,d)) True)
 
-listTe :: Banmen -> [Te]
-listTe (b@Banmen{..}) = avoidOute $ listMoveTe ++ listHariTe
-	where
+filterOute :: Banmen -> [Te] -> [Te]
+filterOute b = filter ((/= Just True) . isOute (_isSente b) . flip applyTe b)
 
-	avoidOute = filter ((/= Just True) . isOute _isSente . flip applyTe b)
+listTe :: Banmen -> [Te]
+listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
+	where
 
 	listMoveTe = do
 		pos <- [Pos (suji, dan) | dan <- [1..9], suji <- [1..9]]
@@ -119,23 +112,16 @@ tekitouLoop n banmen = do
 	unless (Ou `elem` _senteMochigoma banmen || Ou `elem` _kouteMochigoma banmen) $ do
 		tekitouLoop (n + 1) $ applyTe te banmen
 
-tume = Banmen
-    { _banmen = listArray (Pos (1, 1), Pos (9, 9)) (repeat Nothing) // ban
-    , _senteMochigoma = [minBound..maxBound] \\ [Ou]
-    , _kouteMochigoma = [Kin]
-    , _isSente = False
-    }
-    where
-    ban = flip execState [] $ do
-    	k 1 1 True Kyo
-    	k 2 1 True Kei
-    	k 1 2 True Fu
-    	k 2 2 True Ou
-    	k 3 4 True Ryu
-    	k 4 1 False Ma
-    	k 4 2 False Ma
-    	where
-    	k x y color koma = modify ((Pos (x, y), Just (color, koma)):)
+-- http://www.shogitown.com/beginner/2013tume/tume13-08.html
+tume = makeTsumeBanmen $ do
+	addKoma 1 1 True Kyo
+	addKoma 2 1 True Kei
+	addKoma 1 2 True Fu
+	addKoma 2 2 True Ou
+	addKoma 3 4 True Ryu
+	addKoma 4 1 False Ma
+	addKoma 4 2 False Ma
+	return [Kin]
 
 --tumeLoop :: Banmen -> [[Banmen]]
 --problem = runStateT (problem, []) $
@@ -165,3 +151,5 @@ isOute ouSide (b@Banmen{..}) = fmap kiki $ listToMaybe ouPos
 
 isTsumi :: Bool -> Banmen -> Bool
 isTsumi ouSide banmen = and [Just True == isOute ouSide (applyTe te banmen) | te <- listTe banmen]
+
+printSolved solutions = mapM_ (print.map (\t -> (_from t,_to t)) . reverse . snd) solutions

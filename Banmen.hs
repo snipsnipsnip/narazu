@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Banmen where
 
@@ -6,6 +7,7 @@ import Data.Array
 import Data.List
 import Koma
 import Pos
+import Control.Monad.State
 
 -- TODO: use ByteArray
 data Banmen = Banmen
@@ -42,4 +44,24 @@ initialBanmen = Banmen
     empty = replicate 3 $ replicate 9 Nothing
     color isSente komas = map (fmap ((,) isSente)) komas
 
+newtype MBanmen a = MBanmen
+    { runMBanmen :: State [(Pos, Maybe (Bool, Koma))] a
+    } deriving (Functor, Monad)
 
+addKoma x y color koma = MBanmen $ modify ((Pos (x, y), Just (color, koma)):)
+
+makeTsumeBanmen :: MBanmen [Koma] -> Banmen
+makeTsumeBanmen definition = Banmen
+    { _banmen = listArray (Pos (1, 1), Pos (9, 9)) (repeat Nothing) // defs
+    , _senteMochigoma = gyokukataMochigoma 
+    , _kouteMochigoma = semekataMochigoma
+    , _isSente = False
+    }
+    where
+    (semekataMochigoma, defs) = flip runState [] $ runMBanmen definition
+    gyokukataMochigoma = (komaSet \\ banmenKoma) \\ semekataMochigoma
+    banmenKoma = [koma | (_, Just (_, koma)) <- defs]
+    komaSet = concat $
+        replicate 18 [Fu] ++
+        replicate 4 [Kyo, Kei, Gin, Kin] ++
+        replicate 2 [Kaku, Hi]
