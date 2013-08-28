@@ -123,10 +123,17 @@ tume = makeTsumeBanmen $ do
 	addKoma 4 2 False Ma
 	return [Kin]
 
+tume2 = makeTsumeBanmen $ do
+	addKoma 4 1 False Kaku
+	addKoma 4 2 False Kaku
+	addKoma 1 1 True Kyo
+	addKoma 2 1 True Ou
+	return [Kin]
+
 --tumeLoop :: Banmen -> [[Banmen]]
 --problem = runStateT (problem, []) $
-tumeLoop :: StateT (Banmen, [Te]) [] ()
-tumeLoop = fix $ \loop -> do
+solveTume :: Banmen -> [(Banmen, [(Te)])]
+solveTume problem = flip execStateT (problem, []) $ fix $ \loop -> do
 	(banmen, history) <- get
 
 	if length history < 3
@@ -139,9 +146,6 @@ tumeLoop = fix $ \loop -> do
 			loop
 		else do
 			guard $ isTsumi True banmen
-
-solveTume :: [(Banmen, [(Te)])]
-solveTume = execStateT tumeLoop (tume, [])
 
 isOute :: Bool -> Banmen -> Maybe Bool
 isOute ouSide (b@Banmen{..}) = fmap kiki $ listToMaybe ouPos

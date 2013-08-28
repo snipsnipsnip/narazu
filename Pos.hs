@@ -5,13 +5,17 @@ module Pos
 , suji
 , negatePos
 , inBoard
+, IntPos
 , module Data.Monoid
 ) where
 
 import Data.Monoid
 import Data.Ix
+import Data.Int
 
-newtype Pos = Pos {unPos :: (Int, Int)} deriving (Eq, Ord, Ix)
+newtype Pos = Pos {unPos :: (IntPos, IntPos)} deriving (Eq, Ord, Ix)
+
+type IntPos = Int8
 
 instance Monoid Pos where
 	mempty = Pos (0, 0)
@@ -25,9 +29,10 @@ instance Read Pos where
     where
     make (parsed, rest) = (Pos parsed, rest)
 
-dan = snd . unPos
-suji = fst . unPos
-negatePos (Pos (a,b)) =  (Pos (-a, -b))
+dan, suji :: Num a => Pos -> a
+dan = fromIntegral . snd . unPos
+suji = fromIntegral . fst . unPos
+negatePos (Pos (a,b)) = Pos (a, -b)
 
 inBoard (Pos (a, b)) = 1 <= a && a <= 9 && 1 <= b && b <= 9
 
