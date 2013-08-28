@@ -33,9 +33,10 @@ listKoma Banmen{..} = do
 	return (pos, koma)
 
 listKikiKoma :: Banmen -> Pos -> [(Pos, (Bool, Koma))]
-listKikiKoma banmen pos = filter kiki (listKoma banmen)
-	where
-	kiki (komapos, koma) = pos `elem` reachablePosFrom (Just koma) komapos banmen
+listKikiKoma banmen pos = do
+	(komapos, koma@(Just info)) <- assocs $ _banmen banmen
+	guard $ pos `elem` reachablePosFrom koma komapos banmen
+	return (komapos, info)
 
 -- posにコマがあったらどこまで動けるかを調べる。
 -- コマにNothingを渡すと現に盤面にあるコマを使う。
@@ -61,8 +62,10 @@ reachablePosFrom mkoma from Banmen{..} = maybe [] filterReachableCells $ mkoma `
 t a b c d = applyTe (Te (Pos (a,b)) (Pos (c,d)) True)
 
 listTe :: Banmen -> [Te]
-listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
+listTe (b@Banmen{..}) = avoidOute $ listMoveTe ++ listHariTe
 	where
+
+	avoidOute = filter ((/= Just True) . isOute _isSente . flip applyTe b)
 
 	listMoveTe = do
 		pos <- [Pos (suji, dan) | dan <- [1..9], suji <- [1..9]]
@@ -155,9 +158,10 @@ solveTume :: [(Banmen, [(Te)])]
 solveTume = execStateT tumeLoop (tume, [])
 
 isOute :: Bool -> Banmen -> Maybe Bool
-isOute ouSide (b@Banmen{..}) = fmap (not . null . listKikiKoma b . fst) mayOu
+isOute ouSide (b@Banmen{..}) = fmap kiki $ listToMaybe ouPos
 	where
-	mayOu = find (((ouSide, Ou) ==) . snd) $ listKoma b
+	ouPos = [pos | (pos, Just (s, Ou)) <- assocs _banmen, s == ouSide]
+	kiki pos = not $ null $ listKikiKoma b pos
 
 isTsumi :: Bool -> Banmen -> Bool
 isTsumi ouSide banmen = and [Just True == isOute ouSide (applyTe te banmen) | te <- listTe banmen]

@@ -22,6 +22,7 @@ data Te = Te
     持ち駒の添字
     成りエリア
     動けない場所に持ち駒
+    王手の回避義務
 -}
 applyTe :: Te -> Banmen -> Banmen
 applyTe Te{..} Banmen{..} = Banmen
