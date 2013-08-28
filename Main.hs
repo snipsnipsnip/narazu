@@ -128,7 +128,7 @@ tume = Banmen
     	k 2 1 True Kei
     	k 1 2 True Fu
     	k 2 2 True Ou
-    	k 3 4 True Ma
+    	k 3 4 True Ryu
     	k 4 1 False Ma
     	k 4 2 False Ma
     	where
