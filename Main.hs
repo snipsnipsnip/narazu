@@ -130,6 +130,13 @@ tume2 = makeTsumeBanmen $ do
 	addKoma 2 1 True Ou
 	return [Kin]
 
+tume3 = makeTsumeBanmen $ do
+	addKoma 3 1 False Kaku
+	addKoma 4 2 False Kaku
+	addKoma 1 1 True Kyo
+	addKoma 2 1 True Ou
+	return [Kin]
+
 --tumeLoop :: Banmen -> [[Banmen]]
 --problem = runStateT (problem, []) $
 solveTume :: Banmen -> [(Banmen, [(Te)])]

@@ -60,7 +60,7 @@ makeTsumeBanmen definition = Banmen
     where
     (semekataMochigoma, defs) = flip runState [] $ runMBanmen definition
     gyokukataMochigoma = (komaSet \\ banmenKoma) \\ semekataMochigoma
-    banmenKoma = [koma | (_, Just (_, koma)) <- defs]
+    banmenKoma = [demote koma | (_, Just (_, koma)) <- defs]
     komaSet = concat $
         replicate 18 [Fu] ++
         replicate 4 [Kyo, Kei, Gin, Kin] ++
