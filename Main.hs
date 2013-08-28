@@ -18,7 +18,7 @@ import Data.Maybe
 import Data.List
 import Control.Monad
 import System.Random
-import Control.Monad.Writer
+import Control.Monad.State
 
 -- $(makeLenses [''Kyokumen])
 
@@ -78,12 +78,12 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 		(i, koma) <- zip [0..] $ if _isSente then _senteMochigoma else _kouteMochigoma
 		suji <- [1..9]
 		let sujikoma = [(pos, _banmen ! pos) | dan <- [1..9], let pos = Pos (suji, dan)]
-		guard $ checkNifu koma sujikoma
+		guard $ koma /= Fu || checkNifu koma sujikoma
 		(to, Nothing) <- sujikoma
 		guard $ not $ willStuck koma to b
 		return $ Te (Pos (i, 0)) to False
 
-	checkNifu koma sujikoma = (koma == Fu &&) $ isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
+	checkNifu koma sujikoma = isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
 
 willStuck :: Koma -> Pos -> Banmen -> Bool
 willStuck koma to b = suji to == cliff && koma `elem` [Fu, Kei, Kyo]
@@ -100,11 +100,6 @@ choosePromote koma from to b
     promoteArea = if _isSente b then [7..9] else [1..3]
     needPromote = willStuck koma to b
 
-isOute :: Banmen -> Bool
-isOute (b@Banmen{..}) = not $ null $ listKikiKoma b ouPos
-	where
-	Just (ouPos, _) = find (((_isSente, Ou) ==) . snd) $ listKoma b
-
 main = tekitouLoop 1 initialBanmen
 
 tekitouLoop n banmen = do
@@ -118,18 +113,17 @@ tekitouLoop n banmen = do
 	if inBoard $ _from te
 		then print $ _banmen banmen ! _from te
 		else print $ (if _isSente banmen then _senteMochigoma banmen else _kouteMochigoma banmen) !! suji (_from te)
-	guard $ not (_isSente banmen) || isOute banmen
 	unless (Ou `elem` _senteMochigoma banmen || Ou `elem` _kouteMochigoma banmen) $ do
 		tekitouLoop (n + 1) $ applyTe te banmen
 
 tume = Banmen
     { _banmen = listArray (Pos (1, 1), Pos (9, 9)) (repeat Nothing) // ban
-    , _senteMochigoma = [Kin]
-    , _kouteMochigoma = [minBound..maxBound]
-    , _isSente = True
+    , _senteMochigoma = [minBound..maxBound] \\ [Ou]
+    , _kouteMochigoma = [Kin]
+    , _isSente = False
     }
     where
-    ban = execWriter $ do
+    ban = flip execState [] $ do
     	k 1 1 True Kyo
     	k 2 1 True Kei
     	k 1 2 True Fu
@@ -138,5 +132,32 @@ tume = Banmen
     	k 4 1 False Ma
     	k 4 2 False Ma
     	where
-    	k x y color koma = tell [(Pos (x, y), Just (color, koma))]
+    	k x y color koma = modify ((Pos (x, y), Just (color, koma)):)
 
+--tumeLoop :: Banmen -> [[Banmen]]
+--problem = runStateT (problem, []) $
+tumeLoop :: StateT (Banmen, [Te]) [] ()
+tumeLoop = fix $ \loop -> do
+	(banmen, history) <- get
+
+	if length history < 3
+		then do
+			guard $ isOute True banmen == Just (_isSente banmen)
+
+			te <- lift $ listTe banmen
+			let newBanmen = applyTe te banmen
+			put (newBanmen, te:history)
+			loop
+		else do
+			guard $ isTsumi True banmen
+
+solveTume :: [(Banmen, [(Te)])]
+solveTume = execStateT tumeLoop (tume, [])
+
+isOute :: Bool -> Banmen -> Maybe Bool
+isOute ouSide (b@Banmen{..}) = fmap (not . null . listKikiKoma b . fst) mayOu
+	where
+	mayOu = find (((ouSide, Ou) ==) . snd) $ listKoma b
+
+isTsumi :: Bool -> Banmen -> Bool
+isTsumi ouSide banmen = and [Just True == isOute ouSide (applyTe te banmen) | te <- listTe banmen]
