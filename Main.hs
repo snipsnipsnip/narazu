@@ -19,6 +19,7 @@ import Data.List
 import Control.Monad
 import System.Random
 import Control.Monad.State
+import Data.Tree
 
 -- $(makeLenses [''Kyokumen])
 
@@ -79,7 +80,7 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 		guard $ not $ willStuck koma to b
 		return $ Te (Pos (i, 0)) to False
 
-	checkNifu koma sujikoma = isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
+	checkNifu koma sujikoma = all (Just (_isSente, Fu) /=) $ map snd sujikoma
 
 willStuck :: Koma -> Pos -> Banmen -> Bool
 willStuck koma to b = suji to == cliff && koma `elem` [Fu, Kei, Kyo]
@@ -128,31 +129,24 @@ tume2 = makeTsumeBanmen $ do
 	addKoma 4 2 False Kaku
 	addKoma 1 1 True Kyo
 	addKoma 2 1 True Ou
-	return [Kin]
+	return [Kei]
 
 tume3 = makeTsumeBanmen $ do
 	addKoma 3 1 False Kaku
-	addKoma 4 2 False Kaku
+	addKoma 3 2 False Gin
+	addKoma 1 4 False Kin
+	addKoma 4 3 False Fu
+
 	addKoma 1 1 True Kyo
-	addKoma 2 1 True Ou
-	return [Kin]
+	addKoma 3 3 True Ou
+	addKoma 3 4 True Fu
+	return []
 
---tumeLoop :: Banmen -> [[Banmen]]
---problem = runStateT (problem, []) $
-solveTume :: Banmen -> [(Banmen, [(Te)])]
-solveTume problem = flip execStateT (problem, []) $ fix $ \loop -> do
-	(banmen, history) <- get
-
-	if length history < 3
-		then do
-			guard $ isOute True banmen == Just (_isSente banmen)
-
-			te <- lift $ listTe banmen
-			let newBanmen = applyTe te banmen
-			put (newBanmen, te:history)
-			loop
-		else do
-			guard $ isTsumi True banmen
+gameTree :: Banmen -> Tree (Te, Banmen)
+gameTree start = unfoldTree expand seed
+	where
+	seed = (Te (Pos (0, 0)) (Pos (0, 0)) False, start)
+	expand p@(_, banmen) = (p, [(te, applyTe te banmen) | te <- listTe banmen])
 
 isOute :: Bool -> Banmen -> Maybe Bool
 isOute ouSide (b@Banmen{..}) = fmap kiki $ listToMaybe ouPos
