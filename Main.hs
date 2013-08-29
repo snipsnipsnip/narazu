@@ -158,3 +158,15 @@ isTsumi :: Bool -> Banmen -> Bool
 isTsumi ouSide banmen = and [Just True == isOute ouSide (applyTe te banmen) | te <- listTe banmen]
 
 printSolved solutions = mapM_ (print.map (\t -> (_from t,_to t)) . reverse . snd) solutions
+
+solveTume problem = cut 1 $ gameTree problem
+	where
+	cut n (Node state@(_, banmen) children)
+		| n == 3 = do
+			return $ if isTsumi True banmen then [state] else []
+		| otherwise = do
+			history <- concat $ filter (not . any null) $ map (cut (succ n)) $ filter doOute children
+			return (state:history)
+		where
+		doOute (Node (_, banmen) _) = isOute True banmen == Just ((n == 2) == _isSente banmen)
+
