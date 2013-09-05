@@ -76,13 +76,17 @@ listTe (b@Banmen{..}) = listMoveTe ++ listHariTe
 		let sujikoma = [(pos, _banmen ! pos) | dan <- [1..9], let pos = Pos (suji, dan)]
 		guard $ koma /= Fu || checkNifu koma sujikoma
 		(to, Nothing) <- sujikoma
-		guard $ not $ willStuck koma to b
+		guard $ not $ isStuckAt koma to b
 		return $ Te (Pos (i, 0)) to False
 
 	checkNifu koma sujikoma = isNothing $ find (Just (_isSente, Fu) ==) $ map snd sujikoma
 
-willStuck :: Koma -> Pos -> Banmen -> Bool
-willStuck koma to b = suji to == cliff && koma `elem` [Fu, Kei, Kyo]
+isStuckAt :: Koma -> Pos -> Banmen -> Bool
+isStuckAt koma to b = case koma of
+	Fu -> suji to == cliff
+	Kyo -> suji to == cliff
+	Kei -> suji to `elem` [cliff, cliff + 1, cliff - 1]
+	_ -> False
 	where
 	cliff = if _isSente b then 9 else 1
 
@@ -94,7 +98,7 @@ choosePromote koma from to b
     where
     promoteable = any (`elem` promoteArea) [dan from, dan to]
     promoteArea = if _isSente b then [7..9] else [1..3]
-    needPromote = willStuck koma to b
+    needPromote = isStuckAt koma to b
 
 main = tekitouLoop 1 initialBanmen
 
